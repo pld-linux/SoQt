@@ -1,127 +1,119 @@
-
-Summary:	Toolkit for multiplatform development of 2D user interfaces
-Summary(pl.UTF-8):	Wieloplatformowe narzędzia do rozwoju interfejsów urzytkownika 2D.
+#
+# Conditional build:
+%bcond_without	static_libs	# static library
+#
+Summary:	Qt GUI component toolkit library for Coin
+Summary(pl.UTF-8):	Biblioteka komponentu graficznego interfejsu Qt dla biblioteki Coin
 Name:		SoQt
 Version:	1.5.0
-Release:	0.1
-License:	GPL
+Release:	1
+License:	GPL v2 or Coin PEL
 Group:		X11/Libraries
-# http://ftp.coin3d.org/coin/src/all/SoQt-1.5.0.tar.gz
-Source0:	http://ftp.coin3d.org/coin/src/all/%{name}-%{version}.tar.gz
+Source0:	https://bitbucket.org/Coin3D/coin/downloads/%{name}-%{version}.tar.gz
 # Source0-md5:	9f1e582373d66f556b1db113a93ac68e
+Patch0:		%{name}-pc.patch
 URL:		http://www.coin3d.org/lib/soqt/
 BuildRequires:	Coin-devel
-#BuildRequires:	autoconf
-BuildRequires:	automake
-#BuildRequires:	intltool
-#BuildRequires:	libtool
-#Requires(postun):	-
-#Requires(pre,post):	-
-#Requires(preun):	-
-#Requires:	-
-#Provides:	-
-#Provides:	group(foo)
-#Provides:	user(foo)
-#Obsoletes:	-
-#Conflicts:	-
-#BuildArch:	noarch
-#ExclusiveArch:	%{ix86}
+BuildRequires:	OpenGL-GLU-devel
+BuildRequires:	OpenGL-GLX-devel
+BuildRequires:	QtCore-devel >= 4
+BuildRequires:	QtGui-devel >= 4
+BuildRequires:	QtOpenGL-devel >= 4
+BuildRequires:	libstdc++-devel
+BuildRequires:	sed >= 4.0
+BuildRequires:	pkgconfig
+BuildRequires:	qt4-build >= 4
+BuildRequires:	xorg-lib-libX11-devel
+BuildRequires:	xorg-lib-libXext-devel
+BuildRequires:	xorg-lib-libXmu-devel
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
-# HAVE_GLX detection is broken in autocrap
-%define specflags -DHAVE_GLX
-
 %description
-Library which provides the glue between Systems in Motion's Coin
-high-level 3D visualization library and Troll Tech's Qt 2D user
-interface library
+SoQt is a Qt GUI component toolkit library for Coin. It is also
+compatible with SGI and TGS Open Inventor, and the API is based on the
+API of the InventorXt GUI component toolkit.
 
 %description -l pl.UTF-8
-Biblioteka łącząca bibliotekę 3D wysokiego poziomu Coin z interfejsem
-Qt.
+SoQt to biblioteka toolkitu komponentu graficznego interfejsu
+użytkownika (GUI) Qt dla biblioteki Coin. Jest zgodna także z
+biblioteką SGI i TGS Open Inventor, a API jest oparte na API toolkitu
+komponentu graficznego interfejsu użytkownika InventorXt.
 
 %package devel
-Summary:	Header files for ... library
-Summary(pl.UTF-8):	Pliki nagłówkowe biblioteki ...
-Group:		Development/Libraries
+Summary:	Header files for SoQt library
+Summary(pl.UTF-8):	Pliki nagłówkowe biblioteki SoQt
+Group:		X11/Development/Libraries
 Requires:	%{name} = %{version}-%{release}
+Requires:	Coin-devel
+Requires:	QtCore-devel >= 4
+Requires:	OpenGL-GLX-devel
 
 %description devel
 Header files for SoQt library.
 
 %description devel -l pl.UTF-8
-Pliki nagłówkowe biblioteki SoQt
+Pliki nagłówkowe biblioteki SoQt.
 
+%package static
+Summary:	Static SoQt library
+Summary(pl.UTF-8):	Statyczna biblioteka SoQt
+Group:		X11/Development/Libraries
+Requires:	%{name} = %{version}-%{release}
+
+%description static
+Static SoQt library.
+
+%description static -l pl.UTF-8
+Statyczna biblioteka SoQt.
 
 %prep
 %setup -q
-#%setup -q -c -T
-#%setup -q -n %{name}
-#%setup -q -n %{name}-%{version}.orig -a 1
-#%patch0 -p1
-
-# undos the source
-#find '(' -name '*.php' -o -name '*.inc' ')' -print0 | xargs -0 %{__sed} -i -e 's,\r$,,'
-
-# remove CVS control files
-#find -name CVS -print0 | xargs -0 rm -rf
-
-# you'll need this if you cp -a complete dir in source
-# cleanup backups after patching
-find '(' -name '*~' -o -name '*.orig' ')' -print0 | xargs -0 -r -l512 rm -f
+%patch0 -p1
 
 %build
-# if ac/am/* rebuilding is necessary, do it in this order and add
-# appropriate BuildRequires
-#%%{__intltoolize}
-#%%{__gettextize}
-#%%{__libtoolize}
-#%%{__aclocal}
-#%%{__autoconf}
-#%%{__autoheader}
-#%%{__automake}
-# if not running libtool or automake, but config.sub is too old:
-#cp -f /usr/share/automake/config.sub .
-%configure
-%{__make} \
-  LIBS="-lGL -lCoin -lQtGui -lQtCore -lQtOpenGL"
+# -DHAVE_GLX is not passed properly from configure
+CXXFLAGS="%{rpmcxxflags} -DHAVE_GLX"
+%configure \
+	%{?with_static_libs:--enable-static}
 
-#%{__make} \
-#	CFLAGS="%{rpmcflags}" \
-#	LDFLAGS="%{rpmldflags}"
+# GL is missing; cannot rebuild auto* because of missing m4 files
+%{__sed} -i -e '/^LIBS =/s/$/ -lGL/' src/Inventor/Qt/Makefile
+
+%{__make}
 
 %install
 rm -rf $RPM_BUILD_ROOT
-# create directories if necessary
-#install -d $RPM_BUILD_ROOT
-#install -d $RPM_BUILD_ROOT%{_examplesdir}/%{name}-%{version}
 
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
 
+# obsoleted by pkg-config
+%{__rm} $RPM_BUILD_ROOT%{_libdir}/libSoQt.la
+
 %clean
 rm -rf $RPM_BUILD_ROOT
-
 
 %post	-p /sbin/ldconfig
 %postun	-p /sbin/ldconfig
 
-
 %files
 %defattr(644,root,root,755)
+%doc AUTHORS BUGS.txt COPYING ChangeLog FAQ NEWS README
 %attr(755,root,root) %{_bindir}/soqt-config
 %attr(755,root,root) %{_libdir}/libSoQt.so.*.*.*
-# %{_datadir}/%{name}
+%attr(755,root,root) %ghost %{_libdir}/libSoQt.so.20
 %{_datadir}/Coin/conf/soqt-default.cfg
 %{_mandir}/man1/soqt-config.1*
 
-%doc AUTHORS ChangeLog NEWS README
-
 %files devel
 %defattr(644,root,root,755)
-# %doc devel-doc/*
-%{_libdir}/libSoQt.so
-%{_libdir}/libSoQt.la
+%attr(755,root,root) %{_libdir}/libSoQt.so
 %{_includedir}/Inventor/Qt
-%{_aclocaldir}/*.m4
-%{_pkgconfigdir}/*.pc
+%{_pkgconfigdir}/SoQt.pc
+%{_aclocaldir}/soqt.m4
+
+%if %{with static_libs}
+%files static
+%defattr(644,root,root,755)
+%{_libdir}/libSoQt.a
+%endif

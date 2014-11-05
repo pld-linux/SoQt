@@ -1,0 +1,16 @@
+--- SoQt-1.5.0/SoQt.pc.in.orig	2010-03-02 23:57:41.000000000 +0100
++++ SoQt-1.5.0/SoQt.pc.in	2014-11-05 21:11:21.861846303 +0100
+@@ -8,10 +8,10 @@
+ Name: SoQt
+ Description: a Qt Gui-toolkit binding for Coin
+ Version: @SOQT_VERSION@
+-Requires: Coin
++Requires: Coin QtCore
+ Conflicts:
+-Libs: -L${libdir} @SOGUI_EXTRA_LDFLAGS@ @SOGUI_EXTRA_LIBS@
+-Cflags: -I${includedir} @SOGUI_EXTRA_CFLAGS@ @SOGUI_EXTRA_CPPFLAGS@
++Libs: -L${libdir}
++Cflags: -I${includedir}
+ 
+ soqt_host=@host@
+ compiler=@COIN_COMPILER@
