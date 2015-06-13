@@ -14,7 +14,6 @@ Source0:	https://bitbucket.org/Coin3D/coin/downloads/%{name}-%{version}.tar.gz
 Patch0:		%{name}-pc.patch
 URL:		http://www.coin3d.org/lib/soqt/
 BuildRequires:	Coin-devel
-BuildRequires:	OpenGL-GLU-devel
 BuildRequires:	OpenGL-GLX-devel
 BuildRequires:	QtCore-devel >= 4
 BuildRequires:	QtGui-devel >= 4
