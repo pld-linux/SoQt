@@ -1,12 +1,12 @@
 #
 # Conditional build:
 %bcond_without	static_libs	# static library
-#
+
 Summary:	Qt GUI component toolkit library for Coin
 Summary(pl.UTF-8):	Biblioteka komponentu graficznego interfejsu Qt dla biblioteki Coin
 Name:		SoQt
 Version:	1.5.0
-Release:	1
+Release:	2
 License:	GPL v2 or Coin PEL
 Group:		X11/Libraries
 Source0:	https://bitbucket.org/Coin3D/coin/downloads/%{name}-%{version}.tar.gz
@@ -99,18 +99,18 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(644,root,root,755)
 %doc AUTHORS BUGS.txt COPYING ChangeLog FAQ NEWS README
-%attr(755,root,root) %{_bindir}/soqt-config
 %attr(755,root,root) %{_libdir}/libSoQt.so.*.*.*
 %attr(755,root,root) %ghost %{_libdir}/libSoQt.so.20
-%{_datadir}/Coin/conf/soqt-default.cfg
-%{_mandir}/man1/soqt-config.1*
 
 %files devel
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libSoQt.so
+%attr(755,root,root) %{_bindir}/soqt-config
 %{_includedir}/Inventor/Qt
 %{_pkgconfigdir}/SoQt.pc
 %{_aclocaldir}/soqt.m4
+%{_datadir}/Coin/conf/soqt-default.cfg
+%{_mandir}/man1/soqt-config.1*
 
 %if %{with static_libs}
 %files static
