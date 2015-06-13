@@ -19,10 +19,11 @@ BuildRequires:	OpenGL-GLX-devel
 BuildRequires:	QtCore-devel >= 4
 BuildRequires:	QtGui-devel >= 4
 BuildRequires:	QtOpenGL-devel >= 4
+BuildRequires:	automake
 BuildRequires:	libstdc++-devel
-BuildRequires:	sed >= 4.0
 BuildRequires:	pkgconfig
 BuildRequires:	qt4-build >= 4
+BuildRequires:	sed >= 4.0
 BuildRequires:	xorg-lib-libX11-devel
 BuildRequires:	xorg-lib-libXext-devel
 BuildRequires:	xorg-lib-libXmu-devel
@@ -45,8 +46,8 @@ Summary(pl.UTF-8):	Pliki nagłówkowe biblioteki SoQt
 Group:		X11/Development/Libraries
 Requires:	%{name} = %{version}-%{release}
 Requires:	Coin-devel
-Requires:	QtCore-devel >= 4
 Requires:	OpenGL-GLX-devel
+Requires:	QtCore-devel >= 4
 
 %description devel
 Header files for SoQt library.
