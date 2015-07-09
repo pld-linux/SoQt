@@ -6,7 +6,7 @@ Summary:	Qt GUI component toolkit library for Coin
 Summary(pl.UTF-8):	Biblioteka komponentu graficznego interfejsu Qt dla biblioteki Coin
 Name:		SoQt
 Version:	1.5.0
-Release:	2
+Release:	3
 License:	GPL v2 or Coin PEL
 Group:		X11/Libraries
 Source0:	https://bitbucket.org/Coin3D/coin/downloads/%{name}-%{version}.tar.gz
