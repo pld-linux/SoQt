@@ -1,28 +1,43 @@
 #
 # Conditional build:
+%bcond_without	apidocs		# API documentation
 %bcond_without	static_libs	# static library
+%bcond_with	qt4		# Qt4 instead of Qt5
 
 Summary:	Qt GUI component toolkit library for Coin
 Summary(pl.UTF-8):	Biblioteka komponentu graficznego interfejsu Qt dla biblioteki Coin
 Name:		SoQt
-Version:	1.5.0
-Release:	3
-License:	GPL v2 or Coin PEL
+Version:	1.6.0
+Release:	1
+License:	BSD
 Group:		X11/Libraries
-Source0:	https://bitbucket.org/Coin3D/coin/downloads/%{name}-%{version}.tar.gz
-# Source0-md5:	9f1e582373d66f556b1db113a93ac68e
+#Source0Download: https://github.com/coin3d/soqt/releases
+Source0:	https://github.com/coin3d/soqt/releases/download/SoQt-%{version}/soqt-%{version}-src.tar.gz
+# Source0-md5:	724996aedad2a33760dc36f08ceeda22
 Patch0:		%{name}-pc.patch
-URL:		http://www.coin3d.org/lib/soqt/
-BuildRequires:	Coin-devel
+URL:		https://github.com/coin3d/soqt
+BuildRequires:	Coin-devel >= 4.0.0
 BuildRequires:	OpenGL-GLX-devel
+%if %{with qt4}
 BuildRequires:	QtCore-devel >= 4
 BuildRequires:	QtGui-devel >= 4
 BuildRequires:	QtOpenGL-devel >= 4
-BuildRequires:	automake
+%else
+BuildRequires:	Qt5Core-devel >= 5
+BuildRequires:	Qt5Gui-devel >= 5
+BuildRequires:	Qt5OpenGL-devel >= 5
+BuildRequires:	Qt5Widgets-devel >= 5
+%endif
+BuildRequires:	cmake >= 3.0
+%{?with_apidocs:BuildRequires:	doxygen}
 BuildRequires:	libstdc++-devel
 BuildRequires:	pkgconfig
+%if %{with qt4}
 BuildRequires:	qt4-build >= 4
-BuildRequires:	sed >= 4.0
+%else
+BuildRequires:	qt5-build >= 5
+%endif
+BuildRequires:	rpmbuild(macros) >= 1.752
 BuildRequires:	xorg-lib-libX11-devel
 BuildRequires:	xorg-lib-libXext-devel
 BuildRequires:	xorg-lib-libXmu-devel
@@ -44,9 +59,17 @@ Summary:	Header files for SoQt library
 Summary(pl.UTF-8):	Pliki nagłówkowe biblioteki SoQt
 Group:		X11/Development/Libraries
 Requires:	%{name} = %{version}-%{release}
-Requires:	Coin-devel
-Requires:	OpenGL-GLX-devel
+Requires:	Coin-devel >= 4.0.0
+%if %{with qt4}
 Requires:	QtCore-devel >= 4
+Requires:	QtGui-devel >= 4
+Requires:	QtOpenGL-devel >= 4
+%else
+Requires:	Qt5Core-devel >= 5
+Requires:	Qt5Gui-devel >= 5
+Requires:	Qt5OpenGL-devel >= 5
+Requires:	Qt5Widgets-devel >= 5
+%endif
 
 %description devel
 Header files for SoQt library.
@@ -66,29 +89,68 @@ Static SoQt library.
 %description static -l pl.UTF-8
 Statyczna biblioteka SoQt.
 
+%package apidocs
+Summary:	API documentation for SoQt library
+Summary(pl.UTF-8):	Dokumentacja API biblioteki SoQt
+Group:		Documentation
+%{?noarchpackage}
+
+%description apidocs
+API documentation for SoQt library.
+
+%description apidocs -l pl.UTF-8
+Dokumentacja API biblioteki SoQt.
+
 %prep
-%setup -q
+%setup -q -n soqt
 %patch0 -p1
 
 %build
-# -DHAVE_GLX is not passed properly from configure
-CXXFLAGS="%{rpmcxxflags} -DHAVE_GLX"
-%configure \
-	%{?with_static_libs:--enable-static}
-
-# GL is missing; cannot rebuild auto* because of missing m4 files
-%{__sed} -i -e '/^LIBS =/s/$/ -lGL/' src/Inventor/Qt/Makefile
+install -d builddir
+cd builddir
+%cmake .. \
+%if %{with apidocs}
+	-DSOQT_BUILD_DOCUMENTATION=ON \
+	-DSOQT_BUILD_DOC_MAN=ON \
+%endif
+	%{?with_qt4:-DSOQT_USE_QT5=OFF}
 
 %{__make}
+cd ..
+
+%if %{with static_libs}
+install -d builddir-static
+cd builddir-static
+%cmake .. \
+	-DSOQT_BUILD_SHARED_LIBS=OFF \
+	%{?with_qt4:-DSOQT_USE_QT5=OFF}
+
+%{__make}
+cd ..
+%endif
 
 %install
 rm -rf $RPM_BUILD_ROOT
 
-%{__make} install \
+%if %{with static_libs}
+%{__make} -C builddir-static install \
+	DESTDIR=$RPM_BUILD_ROOT
+%endif
+
+%{__make} -C builddir install \
 	DESTDIR=$RPM_BUILD_ROOT
 
 # obsoleted by pkg-config
-%{__rm} $RPM_BUILD_ROOT%{_libdir}/libSoQt.la
+#%{__rm} $RPM_BUILD_ROOT%{_libdir}/libSoQt.la
+
+%if %{with apidocs}
+# packaged as %doc
+%{__rm} -r $RPM_BUILD_ROOT%{_docdir}/html
+# to common names etc.
+%{__rm} $RPM_BUILD_ROOT%{_mandir}/man3/{_*_,components,devices,misc,viewers}.3
+%endif
+# bogus location
+%{__rm} -r $RPM_BUILD_ROOT%{_infodir}/SoQt1
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -101,19 +163,26 @@ rm -rf $RPM_BUILD_ROOT
 %doc AUTHORS BUGS.txt COPYING ChangeLog FAQ NEWS README
 %attr(755,root,root) %{_libdir}/libSoQt.so.*.*.*
 %attr(755,root,root) %ghost %{_libdir}/libSoQt.so.20
+%{_datadir}/SoQt
 
 %files devel
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libSoQt.so
-%attr(755,root,root) %{_bindir}/soqt-config
 %{_includedir}/Inventor/Qt
 %{_pkgconfigdir}/SoQt.pc
-%{_aclocaldir}/soqt.m4
-%{_datadir}/Coin/conf/soqt-default.cfg
-%{_mandir}/man1/soqt-config.1*
+%{_libdir}/cmake/SoQt-%{version}
+%if %{with apidocs}
+%{_mandir}/man3/SoQt*.3*
+%endif
 
 %if %{with static_libs}
 %files static
 %defattr(644,root,root,755)
 %{_libdir}/libSoQt.a
+%endif
+
+%if %{with apidocs}
+%files apidocs
+%defattr(644,root,root,755)
+%doc builddir/html/*.{css,html,js,png}
 %endif
