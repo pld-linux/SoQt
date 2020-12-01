@@ -140,9 +140,6 @@ rm -rf $RPM_BUILD_ROOT
 %{__make} -C builddir install \
 	DESTDIR=$RPM_BUILD_ROOT
 
-# obsoleted by pkg-config
-#%{__rm} $RPM_BUILD_ROOT%{_libdir}/libSoQt.la
-
 %if %{with apidocs}
 # packaged as %doc
 %{__rm} -r $RPM_BUILD_ROOT%{_docdir}/html
