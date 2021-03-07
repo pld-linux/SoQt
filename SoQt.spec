@@ -93,7 +93,7 @@ Statyczna biblioteka SoQt.
 Summary:	API documentation for SoQt library
 Summary(pl.UTF-8):	Dokumentacja API biblioteki SoQt
 Group:		Documentation
-%{?noarchpackage}
+BuildArch:	noarch
 
 %description apidocs
 API documentation for SoQt library.
