@@ -3,17 +3,26 @@
 %bcond_without	apidocs		# API documentation
 %bcond_without	static_libs	# static library
 %bcond_with	qt4		# Qt4 instead of Qt5
+%bcond_without	qt5		# Qt5 (default)
+%bcond_with	qt6		# Qt6 instead of Qt5
+
+%if %{with qt4} || %{with qt6}
+%undefine	with_qt5
+%endif
+%if %{without qt4} && %{without qt5} && %{without qt6}
+%{error: at least one Qt version must be enabled}
+%endif
 
 Summary:	Qt GUI component toolkit library for Coin
 Summary(pl.UTF-8):	Biblioteka komponentu graficznego interfejsu Qt dla biblioteki Coin
 Name:		SoQt
-Version:	1.6.0
+Version:	1.6.2
 Release:	1
 License:	BSD
 Group:		X11/Libraries
 #Source0Download: https://github.com/coin3d/soqt/releases
-Source0:	https://github.com/coin3d/soqt/releases/download/SoQt-%{version}/soqt-%{version}-src.tar.gz
-# Source0-md5:	724996aedad2a33760dc36f08ceeda22
+Source0:	https://github.com/coin3d/soqt/releases/download/v%{version}/soqt-%{version}-src.tar.gz
+# Source0-md5:	70ef0990e009d806c59941d819a62c98
 Patch0:		%{name}-pc.patch
 URL:		https://github.com/coin3d/soqt
 BuildRequires:	Coin-devel >= 4.0.0
@@ -22,11 +31,18 @@ BuildRequires:	OpenGL-GLX-devel
 BuildRequires:	QtCore-devel >= 4
 BuildRequires:	QtGui-devel >= 4
 BuildRequires:	QtOpenGL-devel >= 4
-%else
+%endif
+%if %{with qt5}
 BuildRequires:	Qt5Core-devel >= 5
 BuildRequires:	Qt5Gui-devel >= 5
 BuildRequires:	Qt5OpenGL-devel >= 5
 BuildRequires:	Qt5Widgets-devel >= 5
+%endif
+%if %{with qt6}
+BuildRequires:	Qt6Core-devel >= 6
+BuildRequires:	Qt6Gui-devel >= 6
+BuildRequires:	Qt6OpenGL-devel >= 6
+BuildRequires:	Qt6Widgets-devel >= 6
 %endif
 BuildRequires:	cmake >= 3.0
 %{?with_apidocs:BuildRequires:	doxygen}
@@ -34,8 +50,12 @@ BuildRequires:	libstdc++-devel
 BuildRequires:	pkgconfig
 %if %{with qt4}
 BuildRequires:	qt4-build >= 4
-%else
+%endif
+%if %{with qt5}
 BuildRequires:	qt5-build >= 5
+%endif
+%if %{with qt6}
+BuildRequires:	qt6-build >= 6
 %endif
 BuildRequires:	rpmbuild(macros) >= 1.752
 BuildRequires:	xorg-lib-libX11-devel
@@ -64,11 +84,18 @@ Requires:	Coin-devel >= 4.0.0
 Requires:	QtCore-devel >= 4
 Requires:	QtGui-devel >= 4
 Requires:	QtOpenGL-devel >= 4
-%else
+%endif
+%if %{with qt5}
 Requires:	Qt5Core-devel >= 5
 Requires:	Qt5Gui-devel >= 5
 Requires:	Qt5OpenGL-devel >= 5
 Requires:	Qt5Widgets-devel >= 5
+%endif
+%if %{with qt6}
+Requires:	Qt6Core-devel >= 6
+Requires:	Qt6Gui-devel >= 6
+Requires:	Qt6OpenGL-devel >= 6
+Requires:	Qt6Widgets-devel >= 6
 %endif
 
 %description devel
@@ -113,7 +140,8 @@ cd builddir
 	-DSOQT_BUILD_DOCUMENTATION=ON \
 	-DSOQT_BUILD_DOC_MAN=ON \
 %endif
-	%{?with_qt4:-DSOQT_USE_QT5=OFF}
+	%{!?with_qt5:-DSOQT_USE_QT5=OFF} \
+	%{!?with_qt6:-DSOQT_USE_QT6=OFF}
 
 %{__make}
 cd ..
@@ -123,7 +151,8 @@ install -d builddir-static
 cd builddir-static
 %cmake .. \
 	-DSOQT_BUILD_SHARED_LIBS=OFF \
-	%{?with_qt4:-DSOQT_USE_QT5=OFF}
+	%{!?with_qt5:-DSOQT_USE_QT5=OFF} \
+	%{!?with_qt6:-DSOQT_USE_QT6=OFF}
 
 %{__make}
 cd ..
@@ -146,8 +175,6 @@ rm -rf $RPM_BUILD_ROOT
 # to common names etc.
 %{__rm} $RPM_BUILD_ROOT%{_mandir}/man3/{_*_,components,devices,misc,viewers}.3
 %endif
-# bogus location
-%{__rm} -r $RPM_BUILD_ROOT%{_infodir}/SoQt1
 
 %clean
 rm -rf $RPM_BUILD_ROOT

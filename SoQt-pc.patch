@@ -22,12 +22,3 @@
  htmldir=${docdir}/html
  
  Name: @PROJECT_NAME@
-@@ -15,7 +15,7 @@
- Version: @PROJECT_VERSION@
- Requires: Coin, @PACKAGE_ADDITIONAL_REQUIREMENTS@
- Conflicts:
--Libs: -L${libdir} @SOQT_EXTRA_LDFLAGS@ @SOQT_EXTRA_LIBS@
-+Libs: -L${libdir} -lSoQt @SOQT_EXTRA_LDFLAGS@ @SOQT_EXTRA_LIBS@
- Cflags: -I${includedir} @SOQT_EXTRA_CFLAGS@ @SOQT_EXTRA_CPPFLAGS@
- 
- frameworkdir=@frameworkdir@
