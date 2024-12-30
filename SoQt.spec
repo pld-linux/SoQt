@@ -6,8 +6,8 @@
 %bcond_with	qt5		# Qt5 instead of Qt6
 %bcond_without	qt6		# Qt6 (default)
 
-%if %{with qt4} || %{with qt6}
-%undefine	with_qt5
+%if %{with qt4} || %{with qt5}
+%undefine	with_qt6
 %endif
 %if %{without qt4} && %{without qt5} && %{without qt6}
 %{error: at least one Qt version must be enabled}
