@@ -2,9 +2,9 @@
 # Conditional build:
 %bcond_without	apidocs		# API documentation
 %bcond_without	static_libs	# static library
-%bcond_with	qt4		# Qt4 instead of Qt5
-%bcond_without	qt5		# Qt5 (default)
-%bcond_with	qt6		# Qt6 instead of Qt5
+%bcond_with	qt4		# Qt4 instead of Qt6
+%bcond_with	qt5		# Qt5 instead of Qt6
+%bcond_without	qt6		# Qt6 (default)
 
 %if %{with qt4} || %{with qt6}
 %undefine	with_qt5
@@ -16,13 +16,13 @@
 Summary:	Qt GUI component toolkit library for Coin
 Summary(pl.UTF-8):	Biblioteka komponentu graficznego interfejsu Qt dla biblioteki Coin
 Name:		SoQt
-Version:	1.6.2
+Version:	1.6.3
 Release:	1
 License:	BSD
 Group:		X11/Libraries
 #Source0Download: https://github.com/coin3d/soqt/releases
 Source0:	https://github.com/coin3d/soqt/releases/download/v%{version}/soqt-%{version}-src.tar.gz
-# Source0-md5:	70ef0990e009d806c59941d819a62c98
+# Source0-md5:	412a0de593fd336659faf73e7f96036f
 Patch0:		%{name}-pc.patch
 URL:		https://github.com/coin3d/soqt
 BuildRequires:	Coin-devel >= 4.0.0
@@ -130,7 +130,7 @@ Dokumentacja API biblioteki SoQt.
 
 %prep
 %setup -q -n soqt
-%patch0 -p1
+%patch -P 0 -p1
 
 %build
 install -d builddir
